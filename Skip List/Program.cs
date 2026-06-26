@@ -7,7 +7,7 @@
             List<int> list = new List<int>();
             list.Insert(5);
             list.Insert(10);
-            list.Remove(5);
+            list.Remove(10);
         }
     }
 }

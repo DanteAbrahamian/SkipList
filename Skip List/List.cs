@@ -7,14 +7,15 @@ namespace Skip_List
     public class List<T> where T : IComparable<T>
     {
         int count = 0;
+        int maxHeight = 0;
         Node<T> head = new Node<T>(default(T));
+        Random random = new Random(5);
         int ChooseRandomHeight()
         {
-            Random random = new Random(5);
             while (true)
             {
                 int height = 1;
-                while (random.Next(0, 2) == 0)
+                while (random.Next(0, 2) == 0 && height < head.Height + 1)
                 {
                     height++;
                 }
@@ -24,21 +25,40 @@ namespace Skip_List
         public void Insert(T value)
         {
 
-            Node<T> temp = head;
+            Node<T> temp = head.Next;
             Node<T> down;
+            Node<T> tTemp = head;
             if (count == 0)
             {
-                temp = head.Next;
-                temp = new Node<T>(value);temp.Height = ChooseRandomHeight();
+                temp = new Node<T>(value);
+                temp.Height = ChooseRandomHeight();
+                if (temp.Height > maxHeight)
+                {
+                    maxHeight = temp.Height;
+                    head.Height = maxHeight;
+                }
+                
+                head.Next = temp;
+                head.Height = temp.Height;
+                head.Down = tTemp;
                 for (int index = 0; index < temp.Height; index++)
                 {
-                    temp.Down.Value = temp.Value;
+                    temp.Down = new Node<T>(value);
+                    temp.Down.Height = temp.Height - 1;
+                    temp = temp.Down;
+
+                    tTemp.Down = new Node<T>(default);
+                    tTemp.Down.Height = tTemp.Height - 1;
+                    tTemp = tTemp.Down;
+                    tTemp.Next = temp;
                 }
                 temp.Down = null;
+                
                 count++;
             }
             else
             {
+
                 while (temp.Next != null)
                 {
                     temp = temp.Next;
@@ -48,40 +68,33 @@ namespace Skip_List
                 temp = temp.Next;
                 for (int index = 0; index < temp.Height; index++)
                 {
-                    temp.Down.Value = temp.Value;
+                    temp.Down = new Node<T>(value);
                     temp.Down.Height = temp.Height - 1;
                     temp = temp.Down;
                 }
                 temp.Down = null;
+                if (temp.Height > maxHeight)
+                {
+                    maxHeight = temp.Height;
+                }
+                head.Height = maxHeight;
                 count++;
                 return;
             }
 
-            
+
         }
         public void Remove(T value)
         {
-
-            Node<T> temp;
-            Node<T> down;
-            if (value.Equals(head.Value))
-            {
-                temp = head;
-                head = temp.Next;
-                temp = head;
-                down = null;
-                count--;
-                return;
-            }
-            temp = head;
-            while (!temp.Value.Equals(value))
+            Node<T> temp = head;
+            Node<T> tTemp;
+            while (!temp.Next.Value.Equals(value))
             {
                 temp = temp.Next;
             }
-            down = temp.Down;
-            down.Next = temp.Next;
-            temp = temp.Next;
-            temp.Down = down;
+            tTemp = temp.Next;
+            tTemp = tTemp.Next;
+            temp.Next = tTemp;
             count--;
         }
 
