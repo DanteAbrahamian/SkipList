@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.ComponentModel.Design;
 
 namespace Skip_List
 {
@@ -9,25 +7,62 @@ namespace Skip_List
         int count = 0;
         int maxHeight = 0;
         Node<T> head = new Node<T>(default(T));
-        Random random = new Random(5);
+        Random random = new Random();
+
         int ChooseRandomHeight()
         {
-            while (true)
+            int height = 1;
+
+            while (random.Next(0, 2) == 0 && height < head.Height + 1)
             {
-                int height = 1;
-                while (random.Next(0, 2) == 0 && height < head.Height + 1)
-                {
-                    height++;
-                }
-                return height;
+                height++;
             }
+
+            return height;
         }
+
+        public Node<T> Search(T value)
+        {
+            if(count == 0)
+            {
+                return null;
+            }
+
+            Node<T> curr = head;
+
+            while (curr != null)
+            {
+                int comparison = value.CompareTo(curr.Next.Value);
+
+                if (comparison < 0)
+                {
+                    curr = curr.Down;
+                }
+                else if (comparison > 0)
+                {
+                    curr = curr.Next;
+                }
+                else
+                {
+                    return curr.Next;
+                }
+
+            }
+
+            return null;
+        }
+
         public void Insert(T value)
         {
 
-            Node<T> temp = head.Next;
+            Node<T> temp = head;
+            Node<T> nextTemp;
             Node<T> down;
-            Node<T> tTemp = head;
+            Node<T> newHead = new Node<T>(default(T));
+            Node<T> tTemp = new Node<T>(value);
+            tTemp.Height = ChooseRandomHeight();
+
+            // first thing to add
             if (count == 0)
             {
                 temp = new Node<T>(value);
@@ -37,7 +72,7 @@ namespace Skip_List
                     maxHeight = temp.Height;
                     head.Height = maxHeight;
                 }
-                
+
                 head.Next = temp;
                 head.Height = temp.Height;
                 head.Down = tTemp;
@@ -52,37 +87,97 @@ namespace Skip_List
                     tTemp = tTemp.Down;
                     tTemp.Next = temp;
                 }
-                temp.Down = null;
-                
-                count++;
-            }
-            else
-            {
 
-                while (temp.Next != null)
-                {
-                    temp = temp.Next;
-                }
-                temp.Next = new Node<T>(value);
-                temp.Next.Height = ChooseRandomHeight();
-                temp = temp.Next;
-                for (int index = 0; index < temp.Height; index++)
-                {
-                    temp.Down = new Node<T>(value);
-                    temp.Down.Height = temp.Height - 1;
-                    temp = temp.Down;
-                }
-                temp.Down = null;
-                if (temp.Height > maxHeight)
-                {
-                    maxHeight = temp.Height;
-                }
-                head.Height = maxHeight;
+
                 count++;
                 return;
             }
 
+            while (temp.Next != null)
+            {
+                if (value.CompareTo(temp.Value) > 0)
+                {
+                    temp = temp.Next;
+                }
+                else
+                {
+                    temp = temp.Down;
+                }
 
+
+            }
+            
+            if (temp.Height > tTemp.Height)
+            {
+                int height = temp.Height;
+                for (int i = 0; i < height; i++)
+                {
+                    if (tTemp.Height == temp.Height)
+                    {
+                        temp.Next = tTemp;
+                        temp.Down = temp;
+                        tTemp.Down = tTemp;
+                        temp = temp.Down;
+                        tTemp = tTemp.Down;
+                        temp.Height = i;
+                        tTemp.Height = i;
+                    }
+                    else
+                    {
+                        temp = temp.Down;
+                    }
+                }
+                temp.Down = null;
+                tTemp.Down = null;
+            }
+            //
+            else if (temp.Height < tTemp.Height)
+            {
+                maxHeight = tTemp.Height;
+                newHead.Down = head;
+                head = newHead;
+                head.Next = tTemp;
+                head.Height = tTemp.Height;
+                int height = tTemp.Height;
+                for (int i = 0; i < height; i++)
+                {
+                    if (temp.Height == tTemp.Height)
+                    {
+                        temp.Next = tTemp;
+                        temp.Down = temp;
+                        tTemp.Down = tTemp;
+                        temp = temp.Down;
+                        tTemp = tTemp.Down;
+                        temp.Height = i;
+                        tTemp.Height = i;
+                        
+                    }
+                    else
+                    {
+                        tTemp.Down = tTemp;
+                        tTemp.Down.Height = tTemp.Height - 1;
+                        tTemp = tTemp.Down;
+                    }
+                }
+                temp.Down = null;
+                tTemp.Down = null;
+            }
+            
+            else if (temp.Height == tTemp.Height)
+            {
+                int height = tTemp.Height;
+                for (int i = 0; i < height; i++)
+                {
+                    temp.Next = tTemp.Next;
+                    temp = temp.Down;
+                    tTemp.Down = tTemp;
+                    tTemp.Down.Height = tTemp.Height - 1;
+                    tTemp = tTemp.Down;
+                    
+                }
+            }
+            count++;
+            return;
         }
         public void Remove(T value)
         {
