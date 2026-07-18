@@ -111,6 +111,7 @@ namespace Skip_List
             {
                 int height = temp.Height;
                 for (int i = 0; i < height; i++)
+
                 {
                     if (tTemp.Height == temp.Height)
                     {
@@ -154,9 +155,12 @@ namespace Skip_List
                     }
                     else
                     {
-                        tTemp.Down = tTemp;
+                        temp.Height--;
+                        tTemp.Down = new Node<T>(tTemp.Value);
                         tTemp.Down.Height = tTemp.Height - 1;
                         tTemp = tTemp.Down;
+                        //tTemp.Down.Height = tTemp.Height - 1;
+                       // tTemp = tTemp.Down;
                     }
                 }
                 temp.Down = null;
