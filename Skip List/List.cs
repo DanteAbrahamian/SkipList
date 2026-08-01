@@ -56,57 +56,36 @@ namespace Skip_List
         {
 
             Node<T> temp = head;
-            Node<T> nextTemp;
-            Node<T> down;
-            Node<T> newHead = new Node<T>(default(T));
             Node<T> tTemp = new Node<T>(value);
             tTemp.Height = ChooseRandomHeight();
-
+            tTemp.Height = 2;
             // first thing to add
             if (count == 0)
             {
-                temp = new Node<T>(value);
-                temp.Height = ChooseRandomHeight();
-                if (temp.Height > maxHeight)
+                maxHeight = tTemp.Height;
+
+                if (tTemp.Height > head.Height)
                 {
-                    maxHeight = temp.Height;
-                    head.Height = maxHeight;
+                    
+                    temp = new Node<T>(default);
+                    temp.Height = tTemp.Height;
+                    temp.Next = tTemp;
+                
+                    temp.Down = head;
+                    
+                    tTemp.Down = new Node<T>(value);
+                    temp.Down.Height--;
+                    head.Next = tTemp.Down;
+                    head = temp;
                 }
-
-                head.Next = temp;
-                head.Height = temp.Height;
-                head.Down = tTemp;
-                for (int index = 0; index < temp.Height; index++)
+                else
                 {
-                    temp.Down = new Node<T>(value);
-                    temp.Down.Height = temp.Height - 1;
-                    temp = temp.Down;
-
-                    tTemp.Down = new Node<T>(default);
-                    tTemp.Down.Height = tTemp.Height - 1;
-                    tTemp = tTemp.Down;
-                    tTemp.Next = temp;
+                    head.Next = tTemp;
                 }
-
-
                 count++;
                 return;
             }
 
-            while (temp.Next != null)
-            {
-                if (value.CompareTo(temp.Value) > 0)
-                {
-                    temp = temp.Next;
-                }
-                else
-                {
-                    temp = temp.Down;
-                }
-
-
-            }
-            
             if (temp.Height > tTemp.Height)
             {
                 int height = temp.Height;
@@ -128,15 +107,11 @@ namespace Skip_List
                         temp = temp.Down;
                     }
                 }
-                temp.Down = null;
-                tTemp.Down = null;
             }
             //
             else if (temp.Height < tTemp.Height)
             {
                 maxHeight = tTemp.Height;
-                newHead.Down = head;
-                head = newHead;
                 head.Next = tTemp;
                 head.Height = tTemp.Height;
                 int height = tTemp.Height;
@@ -146,21 +121,18 @@ namespace Skip_List
                     {
                         temp.Next = tTemp;
                         temp.Down = temp;
-                        tTemp.Down = tTemp;
+                        tTemp.Down = new Node<T>(tTemp.Value);
                         temp = temp.Down;
                         tTemp = tTemp.Down;
-                        temp.Height = i;
-                        tTemp.Height = i;
-                        
+                        temp.Height--;
+                        tTemp.Height--;
                     }
                     else
                     {
-                        temp.Height--;
+                        head.Next = tTemp;
                         tTemp.Down = new Node<T>(tTemp.Value);
                         tTemp.Down.Height = tTemp.Height - 1;
                         tTemp = tTemp.Down;
-                        //tTemp.Down.Height = tTemp.Height - 1;
-                       // tTemp = tTemp.Down;
                     }
                 }
                 temp.Down = null;
@@ -183,6 +155,12 @@ namespace Skip_List
             count++;
             return;
         }
+
+
+
+
+
+
         public void Remove(T value)
         {
             Node<T> temp = head;
