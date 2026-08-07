@@ -58,7 +58,6 @@ namespace Skip_List
             Node<T> temp = head;
             Node<T> tTemp = new Node<T>(value);
             tTemp.Height = ChooseRandomHeight();
-            tTemp.Height = 2;
             // first thing to add
             if (count == 0)
             {
@@ -133,7 +132,7 @@ namespace Skip_List
                         tTemp.Down = new Node<T>(tTemp.Value);
                         tTemp.Down.Height = tTemp.Height - 1;
                         tTemp = tTemp.Down;
-                    }
+                    };
                 }
                 temp.Down = null;
                 tTemp.Down = null;
