@@ -1,4 +1,7 @@
-﻿using System.ComponentModel.Design;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.Design;
+using System.Net.Security;
+using System.Security.Cryptography;
 
 namespace Skip_List
 {
@@ -45,6 +48,7 @@ namespace Skip_List
             newNode.Height = GetRandomHeight();
             Node<T> newHead = new Node<T>(default);
             newHead.Height = newNode.Height;
+
             if (newNode.Height > head.Height)
             {
                 
@@ -53,7 +57,7 @@ namespace Skip_List
                 
             }
             Node<T> tempNode = newNode;
-            for (int index = 1; index < newNode.Height; index++)
+            for (int index = 1; index < newHead.Height; index++)
             {
                 
                 newNode.Down = new Node<T>(value);
@@ -62,41 +66,54 @@ namespace Skip_List
             }
             newNode = tempNode;
             Insert(newNode, head);
+            count++;
         }
         public Node<T> Insert(Node<T> newNode, Node<T> currNode)
         {
-            if (currNode.Next is not null)
-            {
-                if (newNode.Value.CompareTo(currNode.Next.Value) < 0)
+           
+                if (currNode.Next is not null)
                 {
-                    return Insert(newNode, currNode.Down);
-                }
-                else if (newNode.Value.CompareTo(currNode.Next.Value) > 0)
-                {
-                    return Insert(newNode, currNode.Next);
-                }
-                if (newNode.Value.CompareTo(currNode.Next.Value) < 0 && newNode.Value.CompareTo(currNode.Next.Value) > 0)
-                {
-                    if (newNode.Height == currNode.Height)
+                    if (newNode.Value.CompareTo(currNode.Next.Value) < 0 && newNode.Value.CompareTo(currNode.Value) > 0)
                     {
-                        newNode.Next = currNode.Next;
-                        currNode.Next = newNode;
-                        return Insert(newNode.Down, currNode.Down);
+                        if (newNode.Height == currNode.Height)
+                        {
+                            newNode.Next = currNode.Next;
+                            currNode.Next = newNode;
+                            if (currNode.Down is not null)
+                            {
+                                return Insert(newNode.Down, currNode.Down);
+                            }
+                        }
+                        else
+                        {
+                            return Insert(newNode, currNode.Down);
+                        }
                     }
-                    else
+                    else if (newNode.Value.CompareTo(currNode.Next.Value) < 0)
                     {
                         return Insert(newNode, currNode.Down);
                     }
+                    else if (newNode.Value.CompareTo(currNode.Next.Value) > 0)
+                    {
+                        return Insert(newNode, currNode.Next);
+                    }
+                    
                 }
-            }
+            
             else
             {
-                currNode.Next = newNode;
-                currNode = currNode.Down;
-                newNode = newNode.Down;
-                if (newNode != null || currNode != null)
+               
+                if (newNode.Height.Equals(currNode.Height))
                 {
-                    Insert(newNode, currNode);
+                    currNode.Next = newNode;
+                    if (currNode.Down is not null)
+                    {
+                        Insert(newNode.Down, currNode.Down);
+                    }
+                }
+                else if (newNode.Height.CompareTo(currNode.Height) < 0)
+                {
+                    Insert(newNode, currNode.Down);
                 }
             }
             return currNode;
@@ -111,25 +128,33 @@ namespace Skip_List
         {
             Node<T> currnode = head;
             Remove(value, currnode);
+            count--;
        
         }
         public Node<T> Remove(T value, Node<T> currNode)
         {
-            if (currNode.Next.Value.CompareTo(value) > 0)
+            if (currNode.Next is not null)
             {
-                currNode = currNode.Next;
-            }
-            else if (currNode.Next.Value.CompareTo(value) < 0)
-            {
-                currNode = currNode.Down;
-            }
-            else if (currNode.Next.Value.Equals(value))
-            {
-                currNode.Next = currNode.Next.Next;
-                if (currNode.Down.Value != null)
+                if (value.CompareTo(currNode.Next.Value) > 0)
                 {
-                    Remove(value, currNode);
+                    Remove(value, currNode.Next);
                 }
+                else if (value.CompareTo(currNode.Next.Value) < 0)
+                {
+                    Remove(value, currNode.Down);
+                }
+                else if (value.Equals(currNode.Next.Value))
+                {
+                    currNode.Next = currNode.Next.Next;
+                    if (currNode.Down is not null)
+                    {
+                        Remove(value, currNode.Down);
+                    }
+                }
+            }
+            else
+            {
+                Remove(value, currNode.Down);
             }
             return currNode;
         }
